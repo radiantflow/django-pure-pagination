@@ -42,12 +42,13 @@ def page_querystring(func):
 class Page(BasePage):
     def __init__(self, object_list, number, paginator):
         super(Page, self).__init__(object_list, number, paginator)
-
+        self.request = None
         if paginator.request:
             # Reason: I just want to perform this operation once, and not once per page
             self.base_queryset = self.paginator.request.GET.copy()
             self.base_queryset['page'] = 'page'
             self.base_queryset = self.base_queryset.urlencode().replace('%', '%%').replace('page=page', 'page=%s')
+            self.request = paginator.request
 
         self.number = PageRepresentation(number, self._other_page_querystring(number))
 
@@ -114,6 +115,7 @@ class Page(BasePage):
             'current_page': self,
             'page_obj': self,  # Issue 9 https://github.com/jamespacileo/django-pure-pagination/issues/9
                                # Use same naming conventions as Django
+            'request': self.request
         })
 
 
