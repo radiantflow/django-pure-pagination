@@ -51,6 +51,7 @@ class Page(BasePage):
             self.request = paginator.request
 
         self.number = PageRepresentation(number, self._other_page_querystring(number))
+        self.anchor = paginator.anchor
 
     def __repr__(self):
         return '<Page %s of %s>' % (self.number, self.paginator.num_pages)
@@ -122,11 +123,12 @@ class Page(BasePage):
 class Paginator(BasePaginator):
     page_class = Page
 
-    def __init__(self, object_list, per_page, orphans=0, allow_empty_first_page=True, request=None):
+    def __init__(self, object_list, per_page, orphans=0, allow_empty_first_page=True, request=None, anchor=None):
         super(Paginator, self).__init__(object_list, per_page, orphans=orphans,
                                         allow_empty_first_page=allow_empty_first_page)
 
         self.request = request
+        self.anchor = anchor
 
     @property
     def first_page(self):
