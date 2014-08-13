@@ -1,25 +1,41 @@
 {% load i18n %}
-<div class="pagination">
-    {% if page_obj.has_previous %}
-        <a href="?{{ page_obj.previous_page_number.querystring }}" class="prev">&lsaquo;&lsaquo; {% trans "previous" %}</a>
-    {% else %}
-        <span class="disabled prev">&lsaquo;&lsaquo; {% trans "previous" %}</span>
-    {% endif %}
-    {% for page in page_obj.pages %}
-        {% if page %}
-            {% ifequal page page_obj.number %}
-                <span class="current page">{{ page }}</span>
-            {% else %}
-                <a href="?{{ page.querystring }}" class="page">{{ page }}</a>
-            {% endifequal %}
+{% load pagination %}
+<div class="pagination-wrapper">
+    <ul class="pagination pagination">
+        {% if page_obj.has_previous %}
+            <li class="prev">
+                <a href="{% pagination_link page_obj page_obj.previous_page_number %}">&laquo; previous</a>
+            </li>
         {% else %}
-            ...
+            <li class="prev disabled">
+                <a href="#">&laquo; previous</a>
+            </li>
         {% endif %}
-    {% endfor %}
-    {% if page_obj.has_next %}
-        <a href="?{{ page_obj.next_page_number.querystring }}" class="next">{% trans "next" %} &rsaquo;&rsaquo;</a>
-    {% else %}
-        <span class="disabled next">{% trans "next" %} &rsaquo;&rsaquo;</span>
-    {% endif %}
+        {% for page in page_obj.pages %}
+            {% if page %}
+                {% ifequal page page_obj.number %}
+                    <li class="active">
+                        <a href="#">{{ page }}</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{% pagination_link page_obj page %}">{{ page }}</a>
+                    </li>
+                {% endifequal %}
+            {% else %}
+                <li class="ellipsis disabled">
+                    <a href="#">...</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <li class="next">
+                <a href="{% pagination_link page_obj page_obj.next_page_number %}">next &raquo;</a>
+            </li>
+        {% else %}
+            <li class="next disabled">
+                <a href="#">next &raquo;</a>
+            </li>
+        {% endif %}
+    </ul>
 </div>
-
