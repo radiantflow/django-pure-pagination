@@ -9,7 +9,7 @@ register = template.Library()
 @register.simple_tag
 def pagination_link(request, page, **kwargs):
     request_copy = copy(request)
-    if request_copy.original_path:
+    if hasattr(request_copy, 'original_path'):
         request_copy.path = request_copy.original_path
     url = UrlHelper(request_copy.get_full_path())
     try:
