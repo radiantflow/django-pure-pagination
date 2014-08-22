@@ -111,7 +111,7 @@ class Page(BasePage):
 
         return 'page=%s' % page_number
 
-    def render(self):
+    def render_pager(self):
         if self.paginator.num_pages > 1:
             return render_to_string('pure_pagination/pagination.html', {
                 'current_page': self,
@@ -122,6 +122,8 @@ class Page(BasePage):
         else:
             return ''
 
+    def render(self):
+        return self.render_pager()
 
 class Paginator(BasePaginator):
     page_class = Page
