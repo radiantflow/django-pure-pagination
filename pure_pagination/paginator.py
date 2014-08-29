@@ -74,26 +74,37 @@ class Page(BasePage):
 
     @page_querystring
     def pages(self):
-        if self.paginator.num_pages <= settings.PAGE_RANGE_DISPLAYED:
+        if self.paginator.num_pages <= settings.MAX_PAGES_DISPLAYED:
             return list(range(1, self.paginator.num_pages + 1))
         result = []
-        left_side = settings.PAGE_RANGE_DISPLAYED / 2
-        right_side = settings.PAGE_RANGE_DISPLAYED - left_side
-        if self.number > self.paginator.num_pages - settings.PAGE_RANGE_DISPLAYED / 2:
-            right_side = self.paginator.num_pages - self.number
-            left_side = settings.PAGE_RANGE_DISPLAYED - right_side
-        elif self.number < settings.PAGE_RANGE_DISPLAYED / 2:
-            left_side = self.number
-            right_side = settings.PAGE_RANGE_DISPLAYED - left_side
-        for page in range(1, self.paginator.num_pages + 1):
-            if page <= settings.MARGIN_PAGES_DISPLAYED:
+
+        num_pages = self.paginator.num_pages
+        max_pages = settings.MAX_PAGES_DISPLAYED
+        margin_pages = settings.MARGIN_PAGES_DISPLAYED
+
+        left_boundary = margin_pages
+        right_boundary = num_pages - margin_pages
+
+        remaining_pages = max_pages - (margin_pages * 2)
+
+        left_index = self.number - (remaining_pages / 2)
+        right_index = left_index + remaining_pages
+
+        if left_index <= left_boundary:
+            left_index = margin_pages + 1
+        elif right_index >= right_boundary:
+            left_index = right_boundary + 1 - remaining_pages
+
+        for page in range(1, num_pages + 1):
+            if page <= left_boundary:
                 result.append(page)
                 continue
-            if page > self.paginator.num_pages - settings.MARGIN_PAGES_DISPLAYED:
+            if page > right_boundary:
                 result.append(page)
                 continue
-            if (page >= self.number - left_side) and (page <= self.number + right_side):
+            if (page >= left_index) and (remaining_pages > 0):
                 result.append(page)
+                remaining_pages -= 1
                 continue
 
             if result and result[-1]:
