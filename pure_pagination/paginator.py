@@ -74,6 +74,22 @@ class Page(BasePage):
 
     @page_querystring
     def pages(self):
+
+        def calculate_indices(el_left=0, el_right=0):
+            if remaining_pages <= 2:
+                left = self.number
+            else:
+                left = self.number - (remaining_pages / 2)
+            right = left + remaining_pages
+
+            if left <= left_boundary:
+                left = margin_pages + 1
+
+            elif right > right_boundary:
+                left = right_boundary + 1 - remaining_pages
+
+            return left, right
+
         if self.paginator.num_pages <= settings.MAX_PAGES_DISPLAYED:
             return list(range(1, self.paginator.num_pages + 1))
         result = []
@@ -81,19 +97,34 @@ class Page(BasePage):
         num_pages = self.paginator.num_pages
         max_pages = settings.MAX_PAGES_DISPLAYED
         margin_pages = settings.MARGIN_PAGES_DISPLAYED
+        ellipsis_width = settings.ELLIPSIS_WIDTH
 
         left_boundary = margin_pages
         right_boundary = num_pages - margin_pages
 
         remaining_pages = max_pages - (margin_pages * 2)
 
-        left_index = self.number - (remaining_pages / 2)
-        right_index = left_index + remaining_pages
+        if margin_pages and ellipsis_width:
+            if self.number > left_boundary:
+                remaining_pages -= 1
+            if self.number < right_boundary:
+                remaining_pages -= 1
 
-        if left_index <= left_boundary:
-            left_index = margin_pages + 1
-        elif right_index >= right_boundary:
-            left_index = right_boundary + 1 - remaining_pages
+            left_index, right_index = calculate_indices()
+
+
+            if left_index - 1 <= left_boundary + ellipsis_width:
+                if self.number > left_boundary:
+                    left_index = left_boundary
+                    remaining_pages += 1
+
+            if right_index -1 >= right_boundary - ellipsis_width:
+                right_index = right_boundary
+                remaining_pages += 1
+
+        else:
+            left_index, right_index = calculate_indices()
+
 
         for page in range(1, num_pages + 1):
             if page <= left_boundary:
@@ -107,7 +138,7 @@ class Page(BasePage):
                 remaining_pages -= 1
                 continue
 
-            if result and result[-1]:
+            if result and result[-1] and margin_pages:
                 result.append(None)
 
         return result
